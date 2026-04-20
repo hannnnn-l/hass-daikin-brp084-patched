@@ -8,14 +8,8 @@
   "documentation": "https://github.com/hannnnn-l/hass-daikin-brp084-patched",
   "integration_type": "device",
   "iot_class": "local_polling",
-  "loggers": [
-    "pydaikin"
-  ],
-  "requirements": [
-    "pydaikin==2.20.0"
-  ],
-  "version": "0.5.1-upstream",
-  "zeroconf": [
-    "_dkapi._tcp.local."
-  ]
+  "loggers": ["pydaikin"],
+  "requirements": ["pydaikin @ git+https://github.com/shuanglengyunji/pydaikin.git@feature/brp084-ftxm71-fixes"],
+  "version": "0.1.1",
+  "zeroconf": ["_dkapi._tcp.local."]
 }

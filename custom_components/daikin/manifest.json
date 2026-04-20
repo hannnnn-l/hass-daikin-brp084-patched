@@ -9,7 +9,7 @@
   "integration_type": "device",
   "iot_class": "local_polling",
   "loggers": ["pydaikin"],
-  "requirements": ["pydaikin @ git+https://github.com/shuanglengyunji/pydaikin.git@feature/brp084-ftxm71-fixes"],
-  "version": "0.2.0",
+  "requirements": ["pydaikin @ git+https://github.com/shuanglengyunji/pydaikin.git@cfbceac7fc253d8a9c93013e72913cd0501d0cc5"],
+  "version": "0.2.2",
   "zeroconf": ["_dkapi._tcp.local."]
 }

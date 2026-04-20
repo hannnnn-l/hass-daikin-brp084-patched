@@ -36,7 +36,7 @@
         "name": "Compressor frequency"
       },
       "compressor_runtime_today": {
-        "name": "Compressor runtime today"
+        "name": "Runtime today"
       },
       "cool_energy_consumption": {
         "name": "Cooling energy (last hour)"

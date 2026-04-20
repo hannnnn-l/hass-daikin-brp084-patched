@@ -115,7 +115,6 @@ SENSOR_TYPES: tuple[DaikinSensorEntityDescription, ...] = (
         device_class=SensorDeviceClass.FREQUENCY,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfFrequency.HERTZ,
-        entity_registry_enabled_default=False,
         value_func=lambda device: device.compressor_frequency,
     ),
     DaikinSensorEntityDescription(
@@ -148,7 +147,10 @@ async def async_setup_entry(
         sensors.append(ATTR_TOTAL_ENERGY_TODAY)
     if daikin_api.device.support_humidity:
         sensors.append(ATTR_HUMIDITY)
-        sensors.append(ATTR_TARGET_HUMIDITY)
+        # HA core also adds ATTR_TARGET_HUMIDITY here, but its value_func reads
+        # device.humidity (not target_humidity) — so on units without humidity
+        # control (most FTXM-series) it silently duplicates the measured value
+        # under a "Target humidity" label. Omit it to avoid the confusion.
     if daikin_api.device.support_compressor_frequency:
         sensors.append(ATTR_COMPRESSOR_FREQUENCY)
 

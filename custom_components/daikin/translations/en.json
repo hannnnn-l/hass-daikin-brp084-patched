@@ -39,6 +39,9 @@
       "heat_energy_consumption": {
         "name": "Heating energy (last hour)"
       },
+      "indoor_humidity": {
+        "name": "Indoor humidity"
+      },
       "inside_temperature": {
         "name": "Indoor temperature"
       },

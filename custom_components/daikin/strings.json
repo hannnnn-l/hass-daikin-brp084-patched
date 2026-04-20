@@ -24,32 +24,26 @@
   },
   "entity": {
     "sensor": {
-      "compressor_energy_consumption": {
-        "name": "Compressor energy consumption (today)"
-      },
       "compressor_estimated_power_consumption": {
-        "name": "Compressor estimated power consumption"
+        "name": "Estimated power draw"
       },
       "compressor_frequency": {
         "name": "Compressor frequency"
       },
       "cool_energy_consumption": {
-        "name": "Cool energy consumption (last hour)"
+        "name": "Cooling energy (last hour)"
       },
       "energy_consumption": {
-        "name": "Energy consumption (today)"
+        "name": "Total energy today"
       },
       "heat_energy_consumption": {
-        "name": "Heat energy consumption (last hour)"
+        "name": "Heating energy (last hour)"
       },
       "inside_temperature": {
-        "name": "Inside temperature"
+        "name": "Indoor temperature"
       },
       "outside_temperature": {
-        "name": "Outside temperature"
-      },
-      "target_humidity": {
-        "name": "Target humidity"
+        "name": "Outdoor temperature"
       }
     },
     "switch": {

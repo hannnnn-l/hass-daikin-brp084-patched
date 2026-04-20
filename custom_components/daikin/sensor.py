@@ -144,7 +144,9 @@ async def async_setup_entry(
         sensors.append(ATTR_COOL_ENERGY)
         sensors.append(ATTR_HEAT_ENERGY)
         sensors.append(ATTR_TOTAL_POWER)
-        sensors.append(ATTR_TOTAL_ENERGY_TODAY)
+        # ATTR_TOTAL_ENERGY_TODAY intentionally skipped on BRP084 — with the
+        # today_energy_consumption fallback we added, it would be a duplicate
+        # of ATTR_ENERGY_TODAY (both resolve to the same `datas[-1]/1000`).
     if daikin_api.device.support_humidity:
         sensors.append(ATTR_HUMIDITY)
         # HA core also adds ATTR_TARGET_HUMIDITY here, but its value_func reads

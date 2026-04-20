@@ -18,12 +18,14 @@ from homeassistant.const import (
     UnitOfFrequency,
     UnitOfPower,
     UnitOfTemperature,
+    UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .const import (
     ATTR_COMPRESSOR_FREQUENCY,
+    ATTR_COMPRESSOR_RUNTIME_TODAY,
     ATTR_COOL_ENERGY,
     ATTR_ENERGY_TODAY,
     ATTR_HEAT_ENERGY,
@@ -127,6 +129,14 @@ SENSOR_TYPES: tuple[DaikinSensorEntityDescription, ...] = (
         entity_registry_enabled_default=False,
         value_func=lambda device: round(device.today_total_energy_consumption, 2),
     ),
+    DaikinSensorEntityDescription(
+        key=ATTR_COMPRESSOR_RUNTIME_TODAY,
+        translation_key="compressor_runtime_today",
+        device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        value_func=lambda device: device.values.get('today_runtime'),
+    ),
 )
 
 
@@ -156,6 +166,8 @@ async def async_setup_entry(
         # under a "Target humidity" label. Omit it to avoid the confusion.
     if daikin_api.device.support_compressor_frequency:
         sensors.append(ATTR_COMPRESSOR_FREQUENCY)
+    if daikin_api.device.values.get('today_runtime') is not None:
+        sensors.append(ATTR_COMPRESSOR_RUNTIME_TODAY)
 
     entities = [
         DaikinSensor(daikin_api, description)

@@ -23,12 +23,20 @@
     }
   },
   "entity": {
+    "binary_sensor": {
+      "compressor_running": {
+        "name": "Compressor running"
+      }
+    },
     "sensor": {
       "compressor_estimated_power_consumption": {
         "name": "Estimated power draw"
       },
       "compressor_frequency": {
         "name": "Compressor frequency"
+      },
+      "compressor_runtime_today": {
+        "name": "Compressor runtime today"
       },
       "cool_energy_consumption": {
         "name": "Cooling energy (last hour)"

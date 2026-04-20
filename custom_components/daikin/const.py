@@ -10,6 +10,8 @@ ATTR_TARGET_HUMIDITY = "target_humidity"
 ATTR_HUMIDITY = "humidity"
 
 ATTR_COMPRESSOR_FREQUENCY = "compressor_frequency"
+ATTR_COMPRESSOR_RUNNING = "compressor_running"
+ATTR_COMPRESSOR_RUNTIME_TODAY = "compressor_runtime_today"
 
 ATTR_ENERGY_TODAY = "energy_today"
 ATTR_COOL_ENERGY = "cool_energy"

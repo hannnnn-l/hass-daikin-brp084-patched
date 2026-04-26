@@ -9,7 +9,7 @@
   "integration_type": "device",
   "iot_class": "local_polling",
   "loggers": ["pydaikin"],
-  "requirements": ["pydaikin @ git+https://github.com/shuanglengyunji/pydaikin.git@cfbceac7fc253d8a9c93013e72913cd0501d0cc5"],
-  "version": "0.2.2",
+  "requirements": ["pydaikin @ git+https://github.com/shuanglengyunji/pydaikin.git@97f9cc867c14b96983e643b484b67049d2f55ee1"],
+  "version": "0.3.0",
   "zeroconf": ["_dkapi._tcp.local."]
 }

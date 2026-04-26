@@ -27,10 +27,16 @@ from .const import (
     ATTR_COMPRESSOR_FREQUENCY,
     ATTR_COMPRESSOR_RUNTIME_TODAY,
     ATTR_COOL_ENERGY,
+    ATTR_EEV_POSITION,
     ATTR_ENERGY_TODAY,
     ATTR_HEAT_ENERGY,
     ATTR_HUMIDITY,
+    ATTR_INDOOR_COIL_INLET_TEMP,
+    ATTR_INDOOR_COIL_OUTLET_TEMP,
     ATTR_INSIDE_TEMPERATURE,
+    ATTR_OUTDOOR_FAN_STEP,
+    ATTR_OUTDOOR_HX_TEMP,
+    ATTR_OUTDOOR_REFRIGERANT_TEMP,
     ATTR_OUTSIDE_TEMPERATURE,
     ATTR_TARGET_HUMIDITY,
     ATTR_TOTAL_ENERGY_TODAY,
@@ -137,6 +143,57 @@ SENSOR_TYPES: tuple[DaikinSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfTime.MINUTES,
         value_func=lambda device: device.values.get('today_runtime'),
     ),
+    # ----- Diagnostic sensors (BRP084-only, disabled by default) -----
+    DaikinSensorEntityDescription(
+        key=ATTR_OUTDOOR_REFRIGERANT_TEMP,
+        translation_key="outdoor_refrigerant_temp",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_registry_enabled_default=False,
+        value_func=lambda device: float(device.values.get('outdoor_refrigerant_temp')),
+    ),
+    DaikinSensorEntityDescription(
+        key=ATTR_OUTDOOR_HX_TEMP,
+        translation_key="outdoor_hx_temp",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_registry_enabled_default=False,
+        value_func=lambda device: float(device.values.get('outdoor_hx_temp')),
+    ),
+    DaikinSensorEntityDescription(
+        key=ATTR_INDOOR_COIL_INLET_TEMP,
+        translation_key="indoor_coil_inlet_temp",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_registry_enabled_default=False,
+        value_func=lambda device: float(device.values.get('indoor_coil_inlet_temp')),
+    ),
+    DaikinSensorEntityDescription(
+        key=ATTR_INDOOR_COIL_OUTLET_TEMP,
+        translation_key="indoor_coil_outlet_temp",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_registry_enabled_default=False,
+        value_func=lambda device: float(device.values.get('indoor_coil_outlet_temp')),
+    ),
+    DaikinSensorEntityDescription(
+        key=ATTR_EEV_POSITION,
+        translation_key="eev_position",
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_registry_enabled_default=False,
+        value_func=lambda device: int(device.values.get('eev_position')),
+    ),
+    DaikinSensorEntityDescription(
+        key=ATTR_OUTDOOR_FAN_STEP,
+        translation_key="outdoor_fan_step",
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_registry_enabled_default=False,
+        value_func=lambda device: int(device.values.get('outdoor_fan_step')),
+    ),
 )
 
 
@@ -168,6 +225,18 @@ async def async_setup_entry(
         sensors.append(ATTR_COMPRESSOR_FREQUENCY)
     if daikin_api.device.values.get('today_runtime') is not None:
         sensors.append(ATTR_COMPRESSOR_RUNTIME_TODAY)
+    # Diagnostic sensors — only register when their value is populated
+    # (units that don't expose the underlying entity simply skip them)
+    for values_key, attr_key in (
+        ('outdoor_refrigerant_temp', ATTR_OUTDOOR_REFRIGERANT_TEMP),
+        ('outdoor_hx_temp',          ATTR_OUTDOOR_HX_TEMP),
+        ('indoor_coil_inlet_temp',   ATTR_INDOOR_COIL_INLET_TEMP),
+        ('indoor_coil_outlet_temp',  ATTR_INDOOR_COIL_OUTLET_TEMP),
+        ('eev_position',             ATTR_EEV_POSITION),
+        ('outdoor_fan_step',         ATTR_OUTDOOR_FAN_STEP),
+    ):
+        if daikin_api.device.values.get(values_key) is not None:
+            sensors.append(attr_key)
 
     entities = [
         DaikinSensor(daikin_api, description)

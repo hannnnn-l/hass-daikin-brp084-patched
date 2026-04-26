@@ -55,6 +55,24 @@
       },
       "outside_temperature": {
         "name": "Outdoor temperature"
+      },
+      "outdoor_refrigerant_temp": {
+        "name": "Outdoor refrigerant temperature"
+      },
+      "outdoor_hx_temp": {
+        "name": "Outdoor coil temperature"
+      },
+      "indoor_coil_inlet_temp": {
+        "name": "Indoor coil inlet temperature"
+      },
+      "indoor_coil_outlet_temp": {
+        "name": "Indoor coil outlet temperature"
+      },
+      "eev_position": {
+        "name": "Expansion valve position"
+      },
+      "outdoor_fan_step": {
+        "name": "Outdoor fan step"
       }
     },
     "switch": {

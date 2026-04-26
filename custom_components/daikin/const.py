@@ -20,6 +20,7 @@ ATTR_EEV_POSITION = "eev_position"
 ATTR_OUTDOOR_FAN_STEP = "outdoor_fan_step"
 ATTR_INDOOR_COIL_INLET_TEMP = "indoor_coil_inlet_temp"
 ATTR_INDOOR_COIL_OUTLET_TEMP = "indoor_coil_outlet_temp"
+ATTR_INTERNAL_HEAT_TARGET = "internal_heat_target"
 
 ATTR_ENERGY_TODAY = "energy_today"
 ATTR_COOL_ENERGY = "cool_energy"

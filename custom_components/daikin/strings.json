@@ -73,6 +73,9 @@
       },
       "outdoor_fan_step": {
         "name": "Outdoor fan step"
+      },
+      "internal_heat_target": {
+        "name": "Internal heating target"
       }
     },
     "switch": {

@@ -34,6 +34,7 @@ from .const import (
     ATTR_INDOOR_COIL_INLET_TEMP,
     ATTR_INDOOR_COIL_OUTLET_TEMP,
     ATTR_INSIDE_TEMPERATURE,
+    ATTR_INTERNAL_HEAT_TARGET,
     ATTR_OUTDOOR_FAN_STEP,
     ATTR_OUTDOOR_HX_TEMP,
     ATTR_OUTDOOR_REFRIGERANT_TEMP,
@@ -194,6 +195,19 @@ SENSOR_TYPES: tuple[DaikinSensorEntityDescription, ...] = (
         entity_registry_enabled_default=False,
         value_func=lambda device: int(device.values.get('outdoor_fan_step')),
     ),
+    # Firmware's internal heating target (user setpoint + 3-4°C compensation).
+    # Disabled by default — primarily a diagnostic for proving the firmware's
+    # heating-overshoot bias. Compare against the user setpoint and actual
+    # room temp to see how much extra the unit silently aims for.
+    DaikinSensorEntityDescription(
+        key=ATTR_INTERNAL_HEAT_TARGET,
+        translation_key="internal_heat_target",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        entity_registry_enabled_default=False,
+        value_func=lambda device: float(device.values.get('internal_heat_target')),
+    ),
 )
 
 
@@ -234,6 +248,7 @@ async def async_setup_entry(
         ('indoor_coil_outlet_temp',  ATTR_INDOOR_COIL_OUTLET_TEMP),
         ('eev_position',             ATTR_EEV_POSITION),
         ('outdoor_fan_step',         ATTR_OUTDOOR_FAN_STEP),
+        ('internal_heat_target',     ATTR_INTERNAL_HEAT_TARGET),
     ):
         if daikin_api.device.values.get(values_key) is not None:
             sensors.append(attr_key)

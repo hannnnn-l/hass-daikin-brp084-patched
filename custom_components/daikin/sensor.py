@@ -126,14 +126,13 @@ SENSOR_TYPES: tuple[DaikinSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfTime.MINUTES,
         value_func=lambda device: device.values.get('today_runtime'),
     ),
-    # ----- Diagnostic sensors (BRP084-only, disabled by default) -----
+    # ----- Diagnostic sensors (BRP084-only) -----
     DaikinSensorEntityDescription(
         key=ATTR_OUTDOOR_REFRIGERANT_TEMP,
         translation_key="outdoor_refrigerant_temp",
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        entity_registry_enabled_default=False,
         value_func=lambda device: float(device.values.get('outdoor_refrigerant_temp')),
     ),
     # ATTR_OUTDOOR_HX_TEMP, ATTR_INDOOR_COIL_INLET_TEMP, ATTR_INDOOR_COIL_OUTLET_TEMP
@@ -143,27 +142,24 @@ SENSOR_TYPES: tuple[DaikinSensorEntityDescription, ...] = (
         key=ATTR_EEV_POSITION,
         translation_key="eev_position",
         state_class=SensorStateClass.MEASUREMENT,
-        entity_registry_enabled_default=False,
         value_func=lambda device: int(device.values.get('eev_position')),
     ),
     DaikinSensorEntityDescription(
         key=ATTR_OUTDOOR_FAN_STEP,
         translation_key="outdoor_fan_step",
         state_class=SensorStateClass.MEASUREMENT,
-        entity_registry_enabled_default=False,
         value_func=lambda device: int(device.values.get('outdoor_fan_step')),
     ),
     # Firmware's internal heating target (user setpoint + 3-4°C compensation).
-    # Disabled by default — primarily a diagnostic for proving the firmware's
-    # heating-overshoot bias. Compare against the user setpoint and actual
-    # room temp to see how much extra the unit silently aims for.
+    # Useful for diagnosing the firmware's heating-overshoot bias — compare
+    # against the user setpoint and actual room temp to see how much extra
+    # the unit silently aims for.
     DaikinSensorEntityDescription(
         key=ATTR_INTERNAL_HEAT_TARGET,
         translation_key="internal_heat_target",
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        entity_registry_enabled_default=False,
         value_func=lambda device: float(device.values.get('internal_heat_target')),
     ),
 )

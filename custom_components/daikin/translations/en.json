@@ -38,14 +38,8 @@
       "compressor_runtime_today": {
         "name": "Runtime today"
       },
-      "cool_energy_consumption": {
-        "name": "Cooling energy (last hour)"
-      },
       "energy_consumption": {
         "name": "Total energy today"
-      },
-      "heat_energy_consumption": {
-        "name": "Heating energy (last hour)"
       },
       "indoor_humidity": {
         "name": "Indoor humidity"
@@ -58,15 +52,6 @@
       },
       "outdoor_refrigerant_temp": {
         "name": "Outdoor refrigerant temperature"
-      },
-      "outdoor_hx_temp": {
-        "name": "Outdoor coil temperature"
-      },
-      "indoor_coil_inlet_temp": {
-        "name": "Indoor coil inlet temperature"
-      },
-      "indoor_coil_outlet_temp": {
-        "name": "Indoor coil outlet temperature"
       },
       "eev_position": {
         "name": "Expansion valve position"

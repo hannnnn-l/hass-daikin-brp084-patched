@@ -26,17 +26,12 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from .const import (
     ATTR_COMPRESSOR_FREQUENCY,
     ATTR_COMPRESSOR_RUNTIME_TODAY,
-    ATTR_COOL_ENERGY,
     ATTR_EEV_POSITION,
     ATTR_ENERGY_TODAY,
-    ATTR_HEAT_ENERGY,
     ATTR_HUMIDITY,
-    ATTR_INDOOR_COIL_INLET_TEMP,
-    ATTR_INDOOR_COIL_OUTLET_TEMP,
     ATTR_INSIDE_TEMPERATURE,
     ATTR_INTERNAL_HEAT_TARGET,
     ATTR_OUTDOOR_FAN_STEP,
-    ATTR_OUTDOOR_HX_TEMP,
     ATTR_OUTDOOR_REFRIGERANT_TEMP,
     ATTR_OUTSIDE_TEMPERATURE,
     ATTR_TARGET_HUMIDITY,
@@ -95,22 +90,9 @@ SENSOR_TYPES: tuple[DaikinSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfPower.KILO_WATT,
         value_func=lambda device: round(device.current_total_power_consumption, 2),
     ),
-    DaikinSensorEntityDescription(
-        key=ATTR_COOL_ENERGY,
-        translation_key="cool_energy_consumption",
-        device_class=SensorDeviceClass.ENERGY,
-        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        entity_registry_enabled_default=False,
-        value_func=lambda device: round(device.last_hour_cool_energy_consumption, 2),
-    ),
-    DaikinSensorEntityDescription(
-        key=ATTR_HEAT_ENERGY,
-        translation_key="heat_energy_consumption",
-        device_class=SensorDeviceClass.ENERGY,
-        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        entity_registry_enabled_default=False,
-        value_func=lambda device: round(device.last_hour_heat_energy_consumption, 2),
-    ),
+    # ATTR_COOL_ENERGY / ATTR_HEAT_ENERGY removed: BRP084 doesn't expose the
+    # curr_day_cool / curr_day_heat counters those rely on, so they always
+    # returned None on this firmware.
     DaikinSensorEntityDescription(
         key=ATTR_ENERGY_TODAY,
         translation_key="energy_consumption",
@@ -154,33 +136,9 @@ SENSOR_TYPES: tuple[DaikinSensorEntityDescription, ...] = (
         entity_registry_enabled_default=False,
         value_func=lambda device: float(device.values.get('outdoor_refrigerant_temp')),
     ),
-    DaikinSensorEntityDescription(
-        key=ATTR_OUTDOOR_HX_TEMP,
-        translation_key="outdoor_hx_temp",
-        device_class=SensorDeviceClass.TEMPERATURE,
-        state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        entity_registry_enabled_default=False,
-        value_func=lambda device: float(device.values.get('outdoor_hx_temp')),
-    ),
-    DaikinSensorEntityDescription(
-        key=ATTR_INDOOR_COIL_INLET_TEMP,
-        translation_key="indoor_coil_inlet_temp",
-        device_class=SensorDeviceClass.TEMPERATURE,
-        state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        entity_registry_enabled_default=False,
-        value_func=lambda device: float(device.values.get('indoor_coil_inlet_temp')),
-    ),
-    DaikinSensorEntityDescription(
-        key=ATTR_INDOOR_COIL_OUTLET_TEMP,
-        translation_key="indoor_coil_outlet_temp",
-        device_class=SensorDeviceClass.TEMPERATURE,
-        state_class=SensorStateClass.MEASUREMENT,
-        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        entity_registry_enabled_default=False,
-        value_func=lambda device: float(device.values.get('indoor_coil_outlet_temp')),
-    ),
+    # ATTR_OUTDOOR_HX_TEMP, ATTR_INDOOR_COIL_INLET_TEMP, ATTR_INDOOR_COIL_OUTLET_TEMP
+    # removed: empirically static or not visibly changing on FTXM71. pydaikin
+    # still populates the underlying values, just not surfaced as HA entities.
     DaikinSensorEntityDescription(
         key=ATTR_EEV_POSITION,
         translation_key="eev_position",
@@ -223,12 +181,11 @@ async def async_setup_entry(
         sensors.append(ATTR_OUTSIDE_TEMPERATURE)
     if daikin_api.device.support_energy_consumption:
         sensors.append(ATTR_ENERGY_TODAY)
-        sensors.append(ATTR_COOL_ENERGY)
-        sensors.append(ATTR_HEAT_ENERGY)
         sensors.append(ATTR_TOTAL_POWER)
-        # ATTR_TOTAL_ENERGY_TODAY intentionally skipped on BRP084 — with the
-        # today_energy_consumption fallback we added, it would be a duplicate
-        # of ATTR_ENERGY_TODAY (both resolve to the same `datas[-1]/1000`).
+        # ATTR_COOL_ENERGY / ATTR_HEAT_ENERGY removed (no curr_day_cool/heat
+        # counters on BRP084 — always returned None).
+        # ATTR_TOTAL_ENERGY_TODAY also skipped — duplicate of ATTR_ENERGY_TODAY
+        # once today_energy_consumption falls back to total.
     if daikin_api.device.support_humidity:
         sensors.append(ATTR_HUMIDITY)
         # HA core also adds ATTR_TARGET_HUMIDITY here, but its value_func reads
@@ -243,9 +200,6 @@ async def async_setup_entry(
     # (units that don't expose the underlying entity simply skip them)
     for values_key, attr_key in (
         ('outdoor_refrigerant_temp', ATTR_OUTDOOR_REFRIGERANT_TEMP),
-        ('outdoor_hx_temp',          ATTR_OUTDOOR_HX_TEMP),
-        ('indoor_coil_inlet_temp',   ATTR_INDOOR_COIL_INLET_TEMP),
-        ('indoor_coil_outlet_temp',  ATTR_INDOOR_COIL_OUTLET_TEMP),
         ('eev_position',             ATTR_EEV_POSITION),
         ('outdoor_fan_step',         ATTR_OUTDOOR_FAN_STEP),
         ('internal_heat_target',     ATTR_INTERNAL_HEAT_TARGET),

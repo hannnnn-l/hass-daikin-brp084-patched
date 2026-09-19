@@ -3,53 +3,68 @@
 Home Assistant's own `daikin` integration, copied verbatim from **HA core 2026.9.3**
 and pinned to **pydaikin 2.20.0** (upstream release, 2026-09-18).
 
-There are no patches in this branch. Its only purpose is to test the current
-upstream code before HA core ships it: HA 2026.9.x still bundles pydaikin 2.19.1.
+This is HA core's `daikin` integration (synced to HA 2026.9.3) pinned to a
+**fork of `pydaikin`** (upstream 2.20.0 plus FTXM71 diagnostics).
 
-Use it to see what BRP084 support looks like without any local changes, then
-compare against the `feature/ha-2026.9-port` branch, which adds the FTXM71
-compressor and refrigerant-circuit entities on top of the same base.
+The original bug fixes (HEAT mode from HA, power switch, energy sensors,
+model/firmware in the device panel) are now in upstream pydaikin
+([pydaikin#81], [pydaikin#124]); this build only adds what upstream lacks.
 
-## What to expect on a BRP084 unit
+## Extra entities in this build
 
-Works (all fixed upstream during 2026):
-- switching to Heat from the climate card
-- the power switch / `climate.turn_on`
-- today's energy and the estimated power draw
-- model and firmware version in the device panel
+- **Compressor frequency** (Hz, enabled by default) and **Compressor running**
+  binary sensor, from outdoor-unit entity `e_2006`. The climate entity also
+  reports `idle` while the compressor is stopped.
+- **Runtime today** (minutes).
+- Diagnostics: outdoor refrigerant temperature, expansion valve position,
+  outdoor fan step, internal heating target (`e_3003/p_0C`).
+- Dropped from core: cool/heat energy (always empty on BRP084), the duplicate
+  "total energy today" sensor, and "Target humidity" (core reads the measured
+  humidity into it).
 
-Not available:
-- compressor frequency — upstream does not read it on BRP084, so the sensor is
-  never created, and the climate entity can never report `idle`
-- compressor running, runtime today, and the refrigerant-circuit diagnostics
+[pydaikin#81]: https://github.com/fredrike/pydaikin/issues/81
+[pydaikin#124]: https://github.com/fredrike/pydaikin/issues/124
 
-Present but not useful:
-- "Target humidity" repeats the measured humidity (an HA core bug)
-- "Cool/Heat energy" have no data on BRP084 (disabled by default)
+## Tests
 
-pydaikin 2.20.0 also supports econo, powerful, comfort airflow, outdoor quiet,
-vane position, dry comfort offset and compressor temperature on BRP084, but HA
-core does not expose any of them as entities yet.
+```bash
+uv venv -p 3.14 .venv
+uv pip install pytest-homeassistant-custom-component==0.13.366 -e ../pydaikin
+.venv/bin/python -m pytest
+```
+
+The tests run the integration against a fake BRP084 unit.
 
 ## Install
 
 ### Via HACS
 
-1. HACS → three-dot menu → **Custom repositories**
-2. Repository: `https://github.com/hannnnn-l/hass-daikin-brp084-patched`, type **Integration**
-3. Install, pick version `v0.5.0-upstream`, then restart Home Assistant.
+1. HACS → Integrations → three-dot menu → **Custom repositories**
+2. Repository: `https://github.com/hannnnn-l/hass-daikin-brp084-patched`
+   Type: **Integration**
+3. Install "Daikin AC (BRP084 patched)", then **restart Home Assistant**.
 
 ### Manual
 
 ```bash
 cd /config
-git clone -b upstream-baseline https://github.com/hannnnn-l/hass-daikin-brp084-patched.git /tmp/daikin-upstream
+git clone https://github.com/hannnnn-l/hass-daikin-brp084-patched.git /tmp/daikin-patched
 mkdir -p custom_components
 cp -r /tmp/daikin-upstream/custom_components/daikin custom_components/
 # Restart HA
 ```
 
-HA installs `pydaikin==2.20.0` from PyPI on the first start after install.
+On first start after install, HA pip-installs the patched `pydaikin` from the
+fork (requires `git` on the host — HA OS ships with it). Expect 30–60s of extra
+startup time on the RPi.
+
+## Compatibility
+
+- Tested on **Daikin FTXM71WVMA** (firmware 3.12.3).
+- Expected to work on any BRP084 unit that exposes outdoor entity `e_2006`
+  (most FTXM-R / FTXM-W / FTXA-R series). On units that don't expose `e_2006`,
+  the compressor sensor simply won't appear — other fixes still apply.
+- Requires Home Assistant 2026.9 or later (the integration code is synced to 2026.9.3).
 
 ## Rolling back
 

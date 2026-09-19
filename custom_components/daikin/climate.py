@@ -59,11 +59,6 @@ DAIKIN_TO_HA_STATE = {
     "dry": HVACMode.DRY,
     "cool": HVACMode.COOL,
     "hot": HVACMode.HEAT,
-    # BRP084's pydaikin driver reports the canonical "heat" rather than
-    # the legacy BRP069 "hot" wire name. Without this alias the reverse
-    # lookup falls through to the HEAT_COOL default and the HA card shows
-    # "Heat/Cool" while the unit is actually in Heat mode.
-    "heat": HVACMode.HEAT,
     "auto": HVACMode.HEAT_COOL,
     "off": HVACMode.OFF,
 }

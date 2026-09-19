@@ -1,6 +1,6 @@
 {
   "domain": "daikin",
-  "name": "Daikin AC (upstream baseline)",
+  "name": "Daikin AC (BRP084 patched)",
   "codeowners": [
     "@hannnnn-l"
   ],
@@ -8,8 +8,14 @@
   "documentation": "https://github.com/hannnnn-l/hass-daikin-brp084-patched",
   "integration_type": "device",
   "iot_class": "local_polling",
-  "loggers": ["pydaikin"],
-  "requirements": ["pydaikin @ git+https://github.com/shuanglengyunji/pydaikin.git@a0704897589a62a2e55239bf8678f875526a2be0"],
-  "version": "0.3.3",
-  "zeroconf": ["_dkapi._tcp.local."]
+  "loggers": [
+    "pydaikin"
+  ],
+  "requirements": [
+    "pydaikin @ git+https://github.com/hannnnn-l/pydaikin.git@4c6e8696ea2871f1689c66df2f0937a4c781cd81"
+  ],
+  "version": "0.4.0",
+  "zeroconf": [
+    "_dkapi._tcp.local."
+  ]
 }

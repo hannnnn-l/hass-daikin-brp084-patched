@@ -135,9 +135,9 @@ SENSOR_TYPES: tuple[DaikinSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
         value_func=lambda device: float(device.values.get('outdoor_refrigerant_temp')),
     ),
-    # ATTR_OUTDOOR_HX_TEMP, ATTR_INDOOR_COIL_INLET_TEMP, ATTR_INDOOR_COIL_OUTLET_TEMP
-    # removed: empirically static or not visibly changing on FTXM71. pydaikin
-    # still populates the underlying values, just not surfaced as HA entities.
+    # The outdoor heat-exchanger temperature and the indoor coil inlet/outlet
+    # temperatures are gone: static or never visibly changing on FTXM71, so
+    # pydaikin stopped reading them as well.
     DaikinSensorEntityDescription(
         key=ATTR_EEV_POSITION,
         translation_key="eev_position",

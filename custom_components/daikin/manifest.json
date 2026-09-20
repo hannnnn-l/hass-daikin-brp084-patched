@@ -12,9 +12,9 @@
     "pydaikin"
   ],
   "requirements": [
-    "pydaikin @ git+https://github.com/hannnnn-l/pydaikin.git@4c6e8696ea2871f1689c66df2f0937a4c781cd81"
+    "pydaikin @ git+https://github.com/hannnnn-l/pydaikin.git@ab5e2e2e561b3ba7d50200467d36b031e9fdfc5a"
   ],
-  "version": "0.5.1-port",
+  "version": "0.5.2-port",
   "zeroconf": [
     "_dkapi._tcp.local."
   ]

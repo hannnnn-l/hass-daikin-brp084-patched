@@ -15,11 +15,8 @@ ATTR_COMPRESSOR_RUNTIME_TODAY = "compressor_runtime_today"
 
 # Diagnostic sensors (BRP084-only, all disabled by default in HA)
 ATTR_OUTDOOR_REFRIGERANT_TEMP = "outdoor_refrigerant_temp"
-ATTR_OUTDOOR_HX_TEMP = "outdoor_hx_temp"
 ATTR_EEV_POSITION = "eev_position"
 ATTR_OUTDOOR_FAN_STEP = "outdoor_fan_step"
-ATTR_INDOOR_COIL_INLET_TEMP = "indoor_coil_inlet_temp"
-ATTR_INDOOR_COIL_OUTLET_TEMP = "indoor_coil_outlet_temp"
 ATTR_INTERNAL_HEAT_TARGET = "internal_heat_target"
 
 ATTR_ENERGY_TODAY = "energy_today"

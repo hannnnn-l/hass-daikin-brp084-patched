@@ -1,7 +1,7 @@
-# Daikin AC — upstream baseline
+# Daikin AC — BRP084 patched
 
-Home Assistant's own `daikin` integration, copied verbatim from **HA core 2026.9.3**
-and pinned to **pydaikin 2.20.0** (upstream release, 2026-09-18).
+Home Assistant custom component for Daikin AC units running the **BRP084** DSIOT API
+(firmware 2.8.0+ / 3.x, typically FTXM-R / FTXM-W / FTXA-R models).
 
 This is HA core's `daikin` integration (synced to HA 2026.9.3) pinned to a
 **fork of `pydaikin`** (upstream 2.20.0 plus FTXM71 diagnostics).
@@ -37,20 +37,25 @@ The tests run the integration against a fake BRP084 unit.
 
 ## Install
 
-### Via HACS
+### Via HACS (recommended)
 
 1. HACS → Integrations → three-dot menu → **Custom repositories**
 2. Repository: `https://github.com/hannnnn-l/hass-daikin-brp084-patched`
    Type: **Integration**
-3. Install "Daikin AC (BRP084 patched)", then **restart Home Assistant**.
+3. Install it, choose version `v0.5.1-port`, then **restart Home Assistant**.
+
+To compare against plain upstream instead, choose `v0.5.1-upstream`: the same
+HA core 2026.9.3 integration with no patches, pinned to pydaikin 2.20.0
+(branch `upstream-baseline`).
 
 ### Manual
 
 ```bash
+# On your HA host (SSH / Samba / whatever you use)
 cd /config
-git clone https://github.com/hannnnn-l/hass-daikin-brp084-patched.git /tmp/daikin-patched
+git clone -b feature/ha-2026.9-port https://github.com/hannnnn-l/hass-daikin-brp084-patched.git /tmp/daikin-patched
 mkdir -p custom_components
-cp -r /tmp/daikin-upstream/custom_components/daikin custom_components/
+cp -r /tmp/daikin-patched/custom_components/daikin custom_components/
 # Restart HA
 ```
 
@@ -70,10 +75,16 @@ startup time on the RPi.
 
 ```bash
 rm -rf /config/custom_components/daikin
-# Restart HA — back to the core integration with its own pinned pydaikin
+# Restart HA — falls back to core integration with stock pydaikin
 ```
 
-## Compatibility
+## Upstream
 
-- Requires Home Assistant 2026.9 or later (the integration code is from 2026.9.3).
-- Tested on **Daikin FTXM71WVMA** (adapter firmware 3.12.3).
+The pydaikin side lives on `feature/brp084-port` in
+<https://github.com/hannnnn-l/pydaikin> (upstream v2.20.0 + the FTXM71
+diagnostics). Once those land upstream and HA core bumps its pin, this custom
+component becomes obsolete — uninstall it and use the core integration.
+
+## License
+
+Same as pydaikin / Home Assistant core (Apache-2.0 / MIT respectively).

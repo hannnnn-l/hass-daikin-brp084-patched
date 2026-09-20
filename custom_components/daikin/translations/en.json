@@ -23,6 +23,11 @@
     }
   },
   "entity": {
+    "binary_sensor": {
+      "compressor_running": {
+        "name": "Compressor running"
+      }
+    },
     "sensor": {
       "compressor_energy_consumption": {
         "name": "Compressor energy consumption (today)"

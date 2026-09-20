@@ -1,6 +1,6 @@
 {
   "domain": "daikin",
-  "name": "Daikin AC (upstream baseline)",
+  "name": "Daikin AC (BRP084 compressor state)",
   "codeowners": [
     "@hannnnn-l"
   ],
@@ -12,9 +12,9 @@
     "pydaikin"
   ],
   "requirements": [
-    "pydaikin==2.20.0"
+    "pydaikin @ git+https://github.com/hannnnn-l/pydaikin.git@8ed8152b41276aa67db05b0efdde4b12e4b54eb7"
   ],
-  "version": "0.5.1-upstream",
+  "version": "0.6.0-compressor",
   "zeroconf": [
     "_dkapi._tcp.local."
   ]

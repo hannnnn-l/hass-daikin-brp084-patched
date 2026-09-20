@@ -1,6 +1,6 @@
 {
   "domain": "daikin",
-  "name": "Daikin AC (BRP084 compressor state)",
+  "name": "Daikin AC (BRP084 patched)",
   "codeowners": [
     "@hannnnn-l"
   ],
@@ -12,9 +12,9 @@
     "pydaikin"
   ],
   "requirements": [
-    "pydaikin @ git+https://github.com/hannnnn-l/pydaikin.git@8ed8152b41276aa67db05b0efdde4b12e4b54eb7"
+    "pydaikin @ git+https://github.com/hannnnn-l/pydaikin.git@b478427dad7be018e389610aafcb564bb396d322"
   ],
-  "version": "0.6.0-compressor",
+  "version": "0.7.0-port",
   "zeroconf": [
     "_dkapi._tcp.local."
   ]

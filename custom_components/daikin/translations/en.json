@@ -29,32 +29,38 @@
       }
     },
     "sensor": {
-      "compressor_energy_consumption": {
-        "name": "Compressor energy consumption (today)"
-      },
       "compressor_estimated_power_consumption": {
-        "name": "Compressor estimated power consumption"
+        "name": "Estimated power draw"
       },
       "compressor_frequency": {
         "name": "Compressor frequency"
       },
-      "cool_energy_consumption": {
-        "name": "Cool energy consumption (last hour)"
+      "compressor_runtime_today": {
+        "name": "Runtime today"
       },
       "energy_consumption": {
-        "name": "Energy consumption (today)"
+        "name": "Total energy today"
       },
-      "heat_energy_consumption": {
-        "name": "Heat energy consumption (last hour)"
+      "indoor_humidity": {
+        "name": "Indoor humidity"
       },
       "inside_temperature": {
-        "name": "Inside temperature"
+        "name": "Indoor temperature"
       },
       "outside_temperature": {
-        "name": "Outside temperature"
+        "name": "Outdoor temperature"
       },
-      "target_humidity": {
-        "name": "Target humidity"
+      "outdoor_refrigerant_temp": {
+        "name": "Outdoor refrigerant temperature"
+      },
+      "eev_position": {
+        "name": "Expansion valve position"
+      },
+      "outdoor_fan_step": {
+        "name": "Outdoor fan step"
+      },
+      "internal_heat_target": {
+        "name": "Internal heating target"
       }
     },
     "switch": {

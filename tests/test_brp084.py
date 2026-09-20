@@ -1,4 +1,4 @@
-"""End-to-end tests for the compressor state, against a fake BRP084 unit.
+"""End-to-end tests against a fake BRP084 (FTXM71-like) unit.
 
 The fake answers /dsiot/multireq the way a real unit does: op=2 reads return
 the current state, op=3 writes update it. Every test goes through HA's config
@@ -141,7 +141,13 @@ async def test_entities_created_with_values(hass: HomeAssistant, unit):
     expected = {
         f"{MAC}-compressor_frequency": "52.0",
         f"{MAC}-compressor_running": "on",
+        f"{MAC}-compressor_runtime_today": "95",
+        f"{MAC}-outdoor_refrigerant_temp": "14.0",
+        f"{MAC}-eev_position": "480",
+        f"{MAC}-outdoor_fan_step": "7",
+        f"{MAC}-internal_heat_target": "25.0",
         f"{MAC}-energy_today": "3.1",
+        f"{MAC}-humidity": "60.0",
         f"{MAC}-inside_temperature": "24.0",
         f"{MAC}-outside_temperature": "8.0",
     }
@@ -149,9 +155,9 @@ async def test_entities_created_with_values(hass: HomeAssistant, unit):
         assert unique_id in ids, f"missing entity {unique_id}"
         assert hass.states.get(ids[unique_id]).state == state, unique_id
 
-    registry = er.async_get(hass)
-    frequency = registry.async_get(ids[f"{MAC}-compressor_frequency"])
-    assert frequency.disabled_by is None, "compressor frequency must be enabled"
+    # Dropped on purpose: always empty or duplicated on BRP084.
+    for key in ("cool_energy", "heat_energy", "target_humidity", "total_energy_today"):
+        assert f"{MAC}-{key}" not in ids
 
 
 async def test_device_info(hass: HomeAssistant, unit):

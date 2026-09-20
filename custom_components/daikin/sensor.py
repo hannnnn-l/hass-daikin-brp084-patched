@@ -18,17 +18,21 @@ from homeassistant.const import (
     UnitOfFrequency,
     UnitOfPower,
     UnitOfTemperature,
+    UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .const import (
     ATTR_COMPRESSOR_FREQUENCY,
-    ATTR_COOL_ENERGY,
+    ATTR_COMPRESSOR_RUNTIME_TODAY,
+    ATTR_EEV_POSITION,
     ATTR_ENERGY_TODAY,
-    ATTR_HEAT_ENERGY,
     ATTR_HUMIDITY,
     ATTR_INSIDE_TEMPERATURE,
+    ATTR_INTERNAL_HEAT_TARGET,
+    ATTR_OUTDOOR_FAN_STEP,
+    ATTR_OUTDOOR_REFRIGERANT_TEMP,
     ATTR_OUTSIDE_TEMPERATURE,
     ATTR_TARGET_HUMIDITY,
     ATTR_TOTAL_ENERGY_TODAY,
@@ -64,6 +68,7 @@ SENSOR_TYPES: tuple[DaikinSensorEntityDescription, ...] = (
     ),
     DaikinSensorEntityDescription(
         key=ATTR_HUMIDITY,
+        translation_key="indoor_humidity",
         device_class=SensorDeviceClass.HUMIDITY,
         state_class=SensorStateClass.MEASUREMENT,
         native_unit_of_measurement=PERCENTAGE,
@@ -85,22 +90,9 @@ SENSOR_TYPES: tuple[DaikinSensorEntityDescription, ...] = (
         native_unit_of_measurement=UnitOfPower.KILO_WATT,
         value_func=lambda device: round(device.current_total_power_consumption, 2),
     ),
-    DaikinSensorEntityDescription(
-        key=ATTR_COOL_ENERGY,
-        translation_key="cool_energy_consumption",
-        device_class=SensorDeviceClass.ENERGY,
-        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        entity_registry_enabled_default=False,
-        value_func=lambda device: round(device.last_hour_cool_energy_consumption, 2),
-    ),
-    DaikinSensorEntityDescription(
-        key=ATTR_HEAT_ENERGY,
-        translation_key="heat_energy_consumption",
-        device_class=SensorDeviceClass.ENERGY,
-        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        entity_registry_enabled_default=False,
-        value_func=lambda device: round(device.last_hour_heat_energy_consumption, 2),
-    ),
+    # ATTR_COOL_ENERGY / ATTR_HEAT_ENERGY removed: BRP084 doesn't expose the
+    # curr_day_cool / curr_day_heat counters those rely on, so they always
+    # returned None on this firmware.
     DaikinSensorEntityDescription(
         key=ATTR_ENERGY_TODAY,
         translation_key="energy_consumption",
@@ -126,6 +118,50 @@ SENSOR_TYPES: tuple[DaikinSensorEntityDescription, ...] = (
         entity_registry_enabled_default=False,
         value_func=lambda device: round(device.today_total_energy_consumption, 2),
     ),
+    DaikinSensorEntityDescription(
+        key=ATTR_COMPRESSOR_RUNTIME_TODAY,
+        translation_key="compressor_runtime_today",
+        device_class=SensorDeviceClass.DURATION,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        native_unit_of_measurement=UnitOfTime.MINUTES,
+        value_func=lambda device: device.values.get('today_runtime'),
+    ),
+    # ----- Diagnostic sensors (BRP084-only) -----
+    DaikinSensorEntityDescription(
+        key=ATTR_OUTDOOR_REFRIGERANT_TEMP,
+        translation_key="outdoor_refrigerant_temp",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        value_func=lambda device: float(device.values.get('outdoor_refrigerant_temp')),
+    ),
+    # The outdoor heat-exchanger temperature and the indoor coil inlet/outlet
+    # temperatures are gone: static or never visibly changing on FTXM71, so
+    # pydaikin stopped reading them as well.
+    DaikinSensorEntityDescription(
+        key=ATTR_EEV_POSITION,
+        translation_key="eev_position",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_func=lambda device: int(device.values.get('eev_position')),
+    ),
+    DaikinSensorEntityDescription(
+        key=ATTR_OUTDOOR_FAN_STEP,
+        translation_key="outdoor_fan_step",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_func=lambda device: int(device.values.get('outdoor_fan_step')),
+    ),
+    # Firmware's internal heating target (user setpoint + 3-4°C compensation).
+    # Useful for diagnosing the firmware's heating-overshoot bias — compare
+    # against the user setpoint and actual room temp to see how much extra
+    # the unit silently aims for.
+    DaikinSensorEntityDescription(
+        key=ATTR_INTERNAL_HEAT_TARGET,
+        translation_key="internal_heat_target",
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        value_func=lambda device: float(device.values.get('internal_heat_target')),
+    ),
 )
 
 
@@ -141,15 +177,31 @@ async def async_setup_entry(
         sensors.append(ATTR_OUTSIDE_TEMPERATURE)
     if daikin_api.device.support_energy_consumption:
         sensors.append(ATTR_ENERGY_TODAY)
-        sensors.append(ATTR_COOL_ENERGY)
-        sensors.append(ATTR_HEAT_ENERGY)
         sensors.append(ATTR_TOTAL_POWER)
-        sensors.append(ATTR_TOTAL_ENERGY_TODAY)
+        # ATTR_COOL_ENERGY / ATTR_HEAT_ENERGY removed (no curr_day_cool/heat
+        # counters on BRP084 — always returned None).
+        # ATTR_TOTAL_ENERGY_TODAY also skipped — duplicate of ATTR_ENERGY_TODAY
+        # once today_energy_consumption falls back to total.
     if daikin_api.device.support_humidity:
         sensors.append(ATTR_HUMIDITY)
-        sensors.append(ATTR_TARGET_HUMIDITY)
+        # HA core also adds ATTR_TARGET_HUMIDITY here, but its value_func reads
+        # device.humidity (not target_humidity) — so on units without humidity
+        # control (most FTXM-series) it silently duplicates the measured value
+        # under a "Target humidity" label. Omit it to avoid the confusion.
     if daikin_api.device.support_compressor_frequency:
         sensors.append(ATTR_COMPRESSOR_FREQUENCY)
+    if daikin_api.device.values.get('today_runtime') is not None:
+        sensors.append(ATTR_COMPRESSOR_RUNTIME_TODAY)
+    # Diagnostic sensors — only register when their value is populated
+    # (units that don't expose the underlying entity simply skip them)
+    for values_key, attr_key in (
+        ('outdoor_refrigerant_temp', ATTR_OUTDOOR_REFRIGERANT_TEMP),
+        ('eev_position',             ATTR_EEV_POSITION),
+        ('outdoor_fan_step',         ATTR_OUTDOOR_FAN_STEP),
+        ('internal_heat_target',     ATTR_INTERNAL_HEAT_TARGET),
+    ):
+        if daikin_api.device.values.get(values_key) is not None:
+            sensors.append(attr_key)
 
     entities = [
         DaikinSensor(daikin_api, description)

@@ -1,73 +1,64 @@
-# Daikin AC — BRP084 patched
+# Daikin AC — upstream baseline
 
-Home Assistant custom component for Daikin AC units running the **BRP084** DSIOT API
-(firmware 2.8.0+ / 3.x, typically FTXM-R / FTXM-W / FTXA-R models).
+Home Assistant's own `daikin` integration, copied verbatim from **HA core 2026.9.3**
+and pinned to **pydaikin 2.20.0** (upstream release, 2026-09-18).
 
-This is HA core's stock `daikin` integration pinned to a **patched fork of
-`pydaikin`** that fixes several BRP084-specific bugs.
+There are no patches in this branch. Its only purpose is to test the current
+upstream code before HA core ships it: HA 2026.9.x still bundles pydaikin 2.19.1.
 
-## Fixes in this build
+Use it to see what BRP084 support looks like without any local changes, then
+compare against the `feature/ha-2026.9-port` branch, which adds the FTXM71
+compressor and refrigerant-circuit entities on top of the same base.
 
-1. **`HEAT` mode works from HA.** The stock pydaikin BRP084 driver silently
-   drops the mode write when HA sends `"hot"` (HA's legacy wire string for
-   `HVACMode.HEAT`), because `REVERSE_MODE_MAP` only knows `"heat"`. Result:
-   switching to Heat from the HA climate card did nothing. This build accepts
-   the `"hot"` alias and sends the mode write correctly. Upstream: [pydaikin#81].
-2. **Compressor frequency sensor.** Reads compressor Hz (and a run flag) from
-   outdoor-unit entity `e_2006/p_04` (u16 little-endian, raw Hz). The base-class
-   `compressor_frequency` property now populates, so HA's
-   `sensor.<name>_compressor_frequency` entity appears.
-3. **Daily energy sensor.** BRP084 reports only the aggregate `datas` array,
-   not the BRP069-style cool/heat split. `today_energy_consumption` now falls
-   back to the daily total instead of returning `0`, so
-   `sensor.<name>_today_energy_consumption` shows actual kWh.
+## What to expect on a BRP084 unit
 
-[pydaikin#81]: https://github.com/fredrike/pydaikin/issues/81
+Works (all fixed upstream during 2026):
+- switching to Heat from the climate card
+- the power switch / `climate.turn_on`
+- today's energy and the estimated power draw
+- model and firmware version in the device panel
+
+Not available:
+- compressor frequency — upstream does not read it on BRP084, so the sensor is
+  never created, and the climate entity can never report `idle`
+- compressor running, runtime today, and the refrigerant-circuit diagnostics
+
+Present but not useful:
+- "Target humidity" repeats the measured humidity (an HA core bug)
+- "Cool/Heat energy" have no data on BRP084 (disabled by default)
+
+pydaikin 2.20.0 also supports econo, powerful, comfort airflow, outdoor quiet,
+vane position, dry comfort offset and compressor temperature on BRP084, but HA
+core does not expose any of them as entities yet.
 
 ## Install
 
-### Via HACS (recommended)
+### Via HACS
 
-1. HACS → Integrations → three-dot menu → **Custom repositories**
-2. Repository: `https://github.com/shuanglengyunji/hass-daikin-brp084-patched`
-   Type: **Integration**
-3. Install "Daikin AC (BRP084 patched)", then **restart Home Assistant**.
+1. HACS → three-dot menu → **Custom repositories**
+2. Repository: `https://github.com/hannnnn-l/hass-daikin-brp084-patched`, type **Integration**
+3. Install, pick version `v0.5.0-upstream`, then restart Home Assistant.
 
 ### Manual
 
 ```bash
-# On your HA host (SSH / Samba / whatever you use)
 cd /config
-git clone https://github.com/shuanglengyunji/hass-daikin-brp084-patched.git /tmp/daikin-patched
+git clone -b upstream-baseline https://github.com/hannnnn-l/hass-daikin-brp084-patched.git /tmp/daikin-upstream
 mkdir -p custom_components
-cp -r /tmp/daikin-patched/custom_components/daikin custom_components/
+cp -r /tmp/daikin-upstream/custom_components/daikin custom_components/
 # Restart HA
 ```
 
-On first start after install, HA pip-installs the patched `pydaikin` from the
-fork (requires `git` on the host — HA OS ships with it). Expect 30–60s of extra
-startup time on the RPi.
-
-## Compatibility
-
-- Tested on **Daikin FTXM71WVMA** (firmware 3.12.3).
-- Expected to work on any BRP084 unit that exposes outdoor entity `e_2006`
-  (most FTXM-R / FTXM-W / FTXA-R series). On units that don't expose `e_2006`,
-  the compressor sensor simply won't appear — other fixes still apply.
-- Requires Home Assistant 2024.1 or later.
+HA installs `pydaikin==2.20.0` from PyPI on the first start after install.
 
 ## Rolling back
 
 ```bash
 rm -rf /config/custom_components/daikin
-# Restart HA — falls back to core integration with stock pydaikin
+# Restart HA — back to the core integration with its own pinned pydaikin
 ```
 
-## Upstream
+## Compatibility
 
-Pydaikin fixes live on [fredrike/pydaikin#TBD]. Once merged and released, this
-custom component becomes obsolete — uninstall and use core.
-
-## License
-
-Same as pydaikin / Home Assistant core (Apache-2.0 / MIT respectively).
+- Requires Home Assistant 2026.9 or later (the integration code is from 2026.9.3).
+- Tested on **Daikin FTXM71WVMA** (adapter firmware 3.12.3).

@@ -1,12 +1,21 @@
 {
   "domain": "daikin",
-  "name": "Daikin AC",
-  "codeowners": ["@fredrike"],
+  "name": "Daikin AC (upstream baseline)",
+  "codeowners": [
+    "@hannnnn-l"
+  ],
   "config_flow": true,
-  "documentation": "https://www.home-assistant.io/integrations/daikin",
+  "documentation": "https://github.com/hannnnn-l/hass-daikin-brp084-patched",
   "integration_type": "device",
   "iot_class": "local_polling",
-  "loggers": ["pydaikin"],
-  "requirements": ["pydaikin==2.19.1"],
-  "zeroconf": ["_dkapi._tcp.local."]
+  "loggers": [
+    "pydaikin"
+  ],
+  "requirements": [
+    "pydaikin==2.20.0"
+  ],
+  "version": "0.5.1-upstream",
+  "zeroconf": [
+    "_dkapi._tcp.local."
+  ]
 }
